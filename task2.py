@@ -61,7 +61,7 @@ def cbc_bitflip_attack() -> tuple[bytes, bytes, bytes]:
     prefix_len = len(prefix)  # used only for alignment
 
     # Add filler bytes so that our placeholder block starts exactly at the
-    # beginning of a new AES block. This makes the bit-flipping predictable.
+    # beginning of a new block
     filler_len = (-prefix_len) % BLOCK_SIZE
     filler = b"B" * filler_len
 
@@ -76,15 +76,10 @@ def cbc_bitflip_attack() -> tuple[bytes, bytes, bytes]:
     modified = bytearray(original_ciphertext)
     prev_block_start = (target_block_index - 1) * BLOCK_SIZE
 
-    # Flip specific bytes in the previous ciphertext block so that
     # 'AadminAtrueA' decrypts into ';admin=true;'.
-    flips = {
-        0: ord("A") ^ ord(";"),
-        6: ord("A") ^ ord("="),
-        11: ord("A") ^ ord(";"),
-    }
-    for pos_in_block, delta in flips.items():
-        modified[prev_block_start + pos_in_block] ^= delta
+    modified[prev_block_start + 0]  ^= ord("A") ^ ord(";")
+    modified[prev_block_start + 6]  ^= ord("A") ^ ord("=")
+    modified[prev_block_start + 11] ^= ord("A") ^ ord(";")
 
     modified_ciphertext = bytes(modified)
 
@@ -110,6 +105,7 @@ if __name__ == "__main__":
     # Perform CBC bit-flipping attack
     original_ciphertext, modified_ciphertext, modified_plaintext = cbc_bitflip_attack()
 
+    # Print results
     print("\n--- CBC bit-flipping attack ---")
     print("Original ciphertext (hex):")
     print(_hex(original_ciphertext))
@@ -117,5 +113,5 @@ if __name__ == "__main__":
     print(_hex(modified_ciphertext))
 
     print("\nVerify (modified ciphertext):", verify(modified_ciphertext))
-    print("\nDecrypted plaintext after attack (utf-8, errors replaced):")
+    print("\nDecrypted plaintext after attack:")
     print(modified_plaintext.decode("utf-8", errors="replace"))
