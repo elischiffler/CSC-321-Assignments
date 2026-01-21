@@ -45,8 +45,8 @@ def int_to_bytes(n: int) -> bytes:
     return n.to_bytes((n.bit_length() + 7) // 8 or 1, "big")
 
 if __name__ == "__main__":
-    # ------------------------- Task 1 Part 1 -------------------------
-    print("\n------------------- Task 1 Part 1 -------------------------")
+    # ------------------------- Task 2 Part 1 -------------------------
+    print("\n------------------- Task 2 Part 1 -------------------------")
     # generate random private keys for A and B
     Ax = secrets.randbelow(q - 2) + 2
     Bx = secrets.randbelow(q - 2) + 2
@@ -130,8 +130,8 @@ if __name__ == "__main__":
     print("Alice's Decrypted Message:", Ak_plaintext)
 
 
-    # ------------------------- Task 1 Part 2 -------------------------
-    print("\n------------------- Task 1 Part 2 -------------------------")
+    # ------------------------- Task 2 Part 2 -------------------------
+    print("\n------------------- Task 2 Part 2 -------------------------")
     # alpha = 1 case
     print("MITM Generator Attack (alpha = 1)")
     g = 1
