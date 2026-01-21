@@ -45,6 +45,8 @@ def int_to_bytes(n: int) -> bytes:
     return n.to_bytes((n.bit_length() + 7) // 8 or 1, "big")
 
 if __name__ == "__main__":
+    # ------------------------- Task 1 Part 1 -------------------------
+    print("\n------------------- Task 1 Part 1 -------------------------")
     # generate random private keys for A and B
     Ax = secrets.randbelow(q - 2) + 2
     Bx = secrets.randbelow(q - 2) + 2
@@ -64,7 +66,7 @@ if __name__ == "__main__":
     Ay = q
     By = q
     print("Modified Ay (sent to Bob):", Ay)
-    print("Modified By (sent to Alice):", By)
+    print("\nModified By (sent to Alice):", By)
 
     # compute shared keys for A and B
     As = pow(By, Ax, q)
@@ -126,3 +128,165 @@ if __name__ == "__main__":
     print("\nAlice receives Bob's message...")
     Ak_plaintext = aes_cbc_decrypt(Ak, Bk_iv, c1)
     print("Alice's Decrypted Message:", Ak_plaintext)
+
+
+    # ------------------------- Task 1 Part 2 -------------------------
+    print("\n------------------- Task 1 Part 2 -------------------------")
+    # alpha = 1 case
+    print("MITM Generator Attack (alpha = 1)")
+    g = 1
+    print("Mallory sets g =", g)
+
+    # generate random private keys for A and B
+    Ax = secrets.randbelow(q - 2) + 2
+    Bx = secrets.randbelow(q - 2) + 2
+
+    # compute public keys for A and B
+    Ay = pow(g, Ax, q)
+    By = pow(g, Bx, q)
+    print("\nAlice's Private Key (Ax):", Ax)
+    print("\nAlice's Public Key (Ay):", Ay)
+    print("\n\nBob's Private Key (Bx):", Bx)
+    print("\nBob's Public Key (By):", By)
+
+    # compute shared keys for A and B
+    As = pow(By, Ax, q)
+    Bs = pow(Ay, Bx, q)
+    print("\n\nAlice's Shared Key (As):", As)
+    print("\nBob's Shared Key (Bs):", Bs)
+    # SHA256 s and truncate 16 bytes to get final shared key
+    Ak = hashlib.sha256(int_to_bytes(As)).digest()[:16]
+    Bk = hashlib.sha256(int_to_bytes(Bs)).digest()[:16]
+    print("\n\nAlice's Derived Shared Key (Ak):", Ak.hex())
+    print("\nBob's Derived Shared Key (Bk):", Bk.hex())
+
+    print("\n\nMallory determines the shared secret: 1")
+    Ms = 1
+    Mk = hashlib.sha256(int_to_bytes(Ms)).digest()[:16]
+    print("\nMallory's derived Shared Key:", Mk.hex())
+
+    # Check if all parties have the same shared key
+    if Ak == Bk == Mk:
+        print("\nAll shared keys match.")
+    else:
+        print("\nShared keys do not match.")
+
+    # Alice encrypts message to Bob
+    Ak_plaintext = "Hi Bob!"
+    print("Alice's Message:", Ak_plaintext)
+    c0 = aes_cbc_encrypt(Ak, Ak_iv, Ak_plaintext)
+    print("Alice's Ciphertext(c0):", c0.hex())
+
+    # Bob encrypts message to Alice
+    Bk_plaintext = "Hello Alice!"
+    print("Bob's Message:", Bk_plaintext)
+    c1 = aes_cbc_encrypt(Bk, Bk_iv, Bk_plaintext)
+    print("Bob's Ciphertext(c1):", c1.hex())
+
+    # Mallory decrypts both messages
+    Mk_plaintext_0 = aes_cbc_decrypt(Mk, Ak_iv, c0)
+    print("\nMallory's Decrypted Message from Alice:", Mk_plaintext_0)
+    Mk_plaintext_1 = aes_cbc_decrypt(Mk, Bk_iv, c1)
+    print("Mallory's Decrypted Message from Bob:", Mk_plaintext_1)
+
+    # alpha = q case
+    print("\n\nMITM Generator Attack (alpha = q)")
+    g = q
+    print("Mallory sets g =", g)
+    # generate random private keys for A and B
+    Ax = secrets.randbelow(q - 2) + 2
+    Bx = secrets.randbelow(q - 2) + 2
+    # compute public keys for A and B
+    Ay = pow(g, Ax, q)
+    By = pow(g, Bx, q)
+    print("\nAlice's Private Key (Ax):", Ax)
+    print("\nAlice's Public Key (Ay):", Ay)
+    print("\n\nBob's Private Key (Bx):", Bx)
+    print("\nBob's Public Key (By):", By)
+    # compute shared keys for A and B
+    As = pow(By, Ax, q)
+    Bs = pow(Ay, Bx, q)
+    print("\n\nAlice's Shared Key (As):", As)
+    print("\nBob's Shared Key (Bs):", Bs)
+    # SHA256 s and truncate 16 bytes to get final shared key
+    Ak = hashlib.sha256(int_to_bytes(As)).digest()[:16]
+    Bk = hashlib.sha256(int_to_bytes(Bs)).digest()[:16]
+    print("\n\nAlice's Derived Shared Key (Ak):", Ak.hex())
+    print("\nBob's Derived Shared Key (Bk):", Bk.hex())
+    print("\n\nMallory determines the shared secret: 0")
+    Ms = 0
+    Mk = hashlib.sha256(int_to_bytes(Ms)).digest()[:16]
+    print("\nMallory's derived Shared Key:", Mk.hex())
+    # Check if all parties have the same shared key
+    if Ak == Bk == Mk:
+        print("\nAll shared keys match.")
+    else:
+        print("\nShared keys do not match.")
+    # Alice encrypts message to Bob
+    Ak_plaintext = "Hi Bob!"
+    print("Alice's Message:", Ak_plaintext)
+    c0 = aes_cbc_encrypt(Ak, Ak_iv, Ak_plaintext)
+    print("Alice's Ciphertext(c0):", c0.hex())
+    # Bob encrypts message to Alice
+    Bk_plaintext = "Hello Alice!"
+    print("Bob's Message:", Bk_plaintext)
+    c1 = aes_cbc_encrypt(Bk, Bk_iv, Bk_plaintext)
+    print("Bob's Ciphertext(c1):", c1.hex())
+    # Mallory decrypts both messages
+    Mk_plaintext_0 = aes_cbc_decrypt(Mk, Ak_iv, c0)
+    print("\nMallory's Decrypted Message from Alice:", Mk_plaintext_0)
+    Mk_plaintext_1 = aes_cbc_decrypt(Mk, Bk_iv, c1)
+    print("Mallory's Decrypted Message from Bob:", Mk_plaintext_1)
+
+    # alpha = q-1 case
+    print("\n\nMITM Generator Attack (alpha = q-1)")
+    g = q - 1
+    print("Mallory sets g =", g)
+    # generate random private keys for A and B
+    Ax = secrets.randbelow(q - 2) + 2
+    Bx = secrets.randbelow(q - 2) + 2
+    # compute public keys for A and B
+    Ay = pow(g, Ax, q)
+    By = pow(g, Bx, q)
+    print("\nAlice's Private Key (Ax):", Ax)
+    print("\nAlice's Public Key (Ay):", Ay)
+    print("\n\nBob's Private Key (Bx):", Bx)
+    print("\nBob's Public Key (By):", By)
+    # compute shared keys for A and B
+    As = pow(By, Ax, q)
+    Bs = pow(Ay, Bx, q)
+    print("\n\nAlice's Shared Key (As):", As)
+    print("\nBob's Shared Key (Bs):", Bs)
+    # SHA256 s and truncate 16 bytes to get final shared key
+    Ak = hashlib.sha256(int_to_bytes(As)).digest()[:16]
+    Bk = hashlib.sha256(int_to_bytes(Bs)).digest()[:16]
+    print("\n\nAlice's Derived Shared Key (Ak):", Ak.hex())
+    print("\nBob's Derived Shared Key (Bk):", Bk.hex())
+    # Mallory determines the shared secret based on parity of private keys
+    if (Ay == 1) or (By == 1):
+        Ms = 1
+    else:
+        Ms = q - 1
+    Mk = hashlib.sha256(int_to_bytes(Ms)).digest()[:16]
+    print("\n\nMallory determines the shared secret:", Ms)
+    print("\nMallory's derived Shared Key:", Mk.hex())
+    # Check if all parties have the same shared key
+    if Ak == Bk == Mk:
+        print("\nAll shared keys match.")
+    else:
+        print("\nShared keys do not match.")
+    # Alice encrypts message to Bob
+    Ak_plaintext = "Hi Bob!"
+    print("Alice's Message:", Ak_plaintext)
+    c0 = aes_cbc_encrypt(Ak, Ak_iv, Ak_plaintext)
+    print("Alice's Ciphertext(c0):", c0.hex())
+    # Bob encrypts message to Alice
+    Bk_plaintext = "Hello Alice!"
+    print("Bob's Message:", Bk_plaintext)
+    c1 = aes_cbc_encrypt(Bk, Bk_iv, Bk_plaintext)
+    print("Bob's Ciphertext(c1):", c1.hex())
+    # Mallory decrypts both messages
+    Mk_plaintext_0 = aes_cbc_decrypt(Mk, Ak_iv, c0)
+    print("\nMallory's Decrypted Message from Alice:", Mk_plaintext_0)
+    Mk_plaintext_1 = aes_cbc_decrypt(Mk, Bk_iv, c1)
+    print("Mallory's Decrypted Message from Bob:", Mk_plaintext_1)
