@@ -2,9 +2,17 @@ import secrets
 import hashlib
 from Crypto.Cipher import AES
 
-# predifined q and g
-q = 37
-g = 5
+# predifined q and g (IETF 1024-bit MODP group)
+Q_HEX = """
+FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1
+29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD
+EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245
+E485B576 625E7EC6 F44C42E9 A637ED6B 0BFF5CB6 F406B7ED
+EE386BFB 5A899FA5 AE9F2411 7C4B1FE6 49286651 ECE65381
+FFFFFFFF FFFFFFFF
+"""
+q = int("".join(Q_HEX.split()), 16)
+g = 2
 
 # PKCS#7 padding
 def pkcs7_pad(data: bytes, block_size: int) -> bytes:
@@ -38,8 +46,8 @@ def int_to_bytes(n: int) -> bytes:
 
 if __name__ == "__main__":
     # generate random private keys for A and B
-    Ax = secrets.randbelow(35) + 1
-    Bx = secrets.randbelow(35) + 1 
+    Ax = secrets.randbelow(q - 2) + 2
+    Bx = secrets.randbelow(q - 2) + 2
 
     # compute public keys for A and B
     Ay = pow(g, Ax, q)
@@ -53,10 +61,22 @@ if __name__ == "__main__":
     Ak = hashlib.sha256(int_to_bytes(As)).digest()[:16]
     Bk = hashlib.sha256(int_to_bytes(Bs)).digest()[:16]
 
+    # ---------- print keys ----------
+    print("\nAlice's Private Key (Ax):", Ax)
+    print("\nAlice's Public Key (Ay):", Ay)
+    
+    print("\n\nBob's Private Key (Bx):", Bx)
+    print("\nBob's Public Key (By):", By)
+
+    print("\n\nAlice's Shared Key (As):", As)
+    print("\nBob's Shared Key (Bs):", Bs)
+
+    print("\n\nAlice's Final Shared Key (Ak):", Ak.hex())
+    print("\nBob's Final Shared Key (Bk):", Bk.hex())
 
     # ------------ exchange messages ------------
     # verify that both shared keys are the same
-    print("Checking if shared keys match...")
+    print("\nChecking if shared keys match...")
     if Ak == Bk:
         print("Shared keys match.")
     else:
