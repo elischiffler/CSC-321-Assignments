@@ -1,5 +1,4 @@
 import requests
-import string
 import itertools
 
 url = "https://1195c61969e46a0503d1fbae1c5e8b56.ctf.hacker101.com/secure-login/"
@@ -194,4 +193,4 @@ def findSalt():
 # crackZipFile() # password found to be hahahaha
 # SQLInject() # password found to be S3creT_p4ssw0rd-$
 # flag11Search() # username found to be grinchadmin
-findSalt()
+# findSalt() # salt found to be mrgrinch463
